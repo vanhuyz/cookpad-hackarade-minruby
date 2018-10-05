@@ -176,23 +176,33 @@ def evaluate(exp, env)
     # Advice: $function_definitions[???] = ???
     # raise(NotImplementedError) # Problem 5
     $function_definitions[exp[1]] = exp[2..-1]
-    # pp(exp)
+
 #
 ## Problem 6: Arrays and Hashes
 #
 
   # You don't need advices anymore, do you?
+  # pp(exp)
+  # pp(env)
   when "ary_new"
-    raise(NotImplementedError) # Problem 6
+    # raise(NotImplementedError) # Problem 6
+    exp[1..-1].map do |v|
+      evaluate(v, env)
+    end
 
   when "ary_ref"
-    raise(NotImplementedError) # Problem 6
+    # raise(NotImplementedError) # Problem 6
+    evaluate(exp[1], env)[evaluate(exp[2], env)]
 
   when "ary_assign"
-    raise(NotImplementedError) # Problem 6
+    # raise(NotImplementedError) # Problem 6
+    env[exp[1][1]][evaluate(exp[2],env)] = evaluate(exp[3], env)
 
   when "hash_new"
-    raise(NotImplementedError) # Problem 6
+    # raise(NotImplementedError) # Problem 6
+    h = exp[1..-1].map do |v|
+      evaluate(v, env)
+    end.each_slice(2).to_h
 
   else
     p("error")
