@@ -4,7 +4,7 @@ require "minruby"
 def evaluate(exp, env)
   # exp: A current node of AST
   # env: An environment (explained later)
-
+  # pp(exp)
   case exp[0]
 
 #
@@ -157,7 +157,12 @@ def evaluate(exp, env)
       # (*1) formal parameter: a variable as found in the function definition.
       # For example, `a`, `b`, and `c` are the formal parameters of
       # `def foo(a, b, c)`.
-      raise(NotImplementedError) # Problem 5
+      # raise(NotImplementedError) # Problem 5
+      func_env = {}
+      func[0].each_with_index do |v, i|
+        func_env[v] = evaluate(exp[2+i], env)
+      end
+      evaluate(func[1], func_env)
     end
 
   when "func_def"
@@ -169,9 +174,9 @@ def evaluate(exp, env)
     # All you need is store them into $function_definitions.
     #
     # Advice: $function_definitions[???] = ???
-    raise(NotImplementedError) # Problem 5
-
-
+    # raise(NotImplementedError) # Problem 5
+    $function_definitions[exp[1]] = exp[2..-1]
+    # pp(exp)
 #
 ## Problem 6: Arrays and Hashes
 #
