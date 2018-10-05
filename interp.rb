@@ -4,7 +4,6 @@ require "minruby"
 def evaluate(exp, env)
   # exp: A current node of AST
   # env: An environment (explained later)
-  # pp(exp)
   case exp[0]
 
 #
@@ -200,7 +199,7 @@ def evaluate(exp, env)
 
   when "hash_new"
     # raise(NotImplementedError) # Problem 6
-    h = exp[1..-1].map do |v|
+    exp[1..-1].map do |v|
       evaluate(v, env)
     end.each_slice(2).to_h
 
