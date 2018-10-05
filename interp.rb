@@ -108,7 +108,7 @@ def evaluate(exp, env)
   when "func_call"
     # Lookup the function definition by the given function name.
     func = $function_definitions[exp[1]]
-
+    # pp($function_definitions)
     if func.nil?
       # We couldn't find a user-defined function definition;
       # it should be a builtin function.
@@ -118,6 +118,18 @@ def evaluate(exp, env)
         # MinRuby's `p` method is implemented by Ruby's `p` method.
         p(evaluate(exp[2], env))
       # ... Problem 4
+      when "Integer"
+        Integer(evaluate(exp[2], env))
+      when "fizzbuzz"
+        if evaluate(exp[2], env) % 15 == 0
+          'FizzBuzz'
+        elsif evaluate(exp[2], env) % 3 == 0
+          'Fizz'
+        elsif evaluate(exp[2], env) % 5 == 0
+          'Buzz'
+        else
+          evaluate(exp[2], env)
+        end
       else
         raise("unknown builtin function")
       end
