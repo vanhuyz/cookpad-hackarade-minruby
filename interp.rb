@@ -4,12 +4,13 @@ require "minruby"
 def evaluate(exp, env)
   # exp: A current node of AST
   # env: An environment (explained later)
+  if exp != nil
+    # pass
   case exp[0]
 
 #
 ## Problem 1: Arithmetics
 #
-
   when "lit"
     exp[1] # return the immediate value as is
 
@@ -41,6 +42,8 @@ def evaluate(exp, env)
     evaluate(exp[1], env) <= evaluate(exp[2], env)
   when "=="
     evaluate(exp[1], env) == evaluate(exp[2], env)
+  when "!="
+    evaluate(exp[1], env) != evaluate(exp[2], env)
 #
 ## Problem 2: Statements and variables
 #
@@ -51,8 +54,16 @@ def evaluate(exp, env)
     # Advice 1: Insert `pp(exp)` and observe the AST first.
     # Advice 2: Apply `evaluate` to each child of this node.
     # raise(NotImplementedError) # Problem 2
-    for i in 1..exp.length-1 do
+
+    ### for not supported
+    # for i in 1..exp.length-1 do
+    #   evaluate(exp[i], env)
+    # end
+
+    i = 1
+    while exp[i]
       evaluate(exp[i], env)
+      i = i + 1
     end
 
   # The second argument of this method, `env`, is an "environement" that
@@ -107,7 +118,6 @@ def evaluate(exp, env)
   when "func_call"
     # Lookup the function definition by the given function name.
     func = $function_definitions[exp[1]]
-    # pp($function_definitions)
     if func.nil?
       # We couldn't find a user-defined function definition;
       # it should be a builtin function.
@@ -129,11 +139,16 @@ def evaluate(exp, env)
         else
           evaluate(exp[2], env)
         end
+      when "minruby_parse"
+        minruby_parse(evaluate(exp[2], env))
+      when "minruby_load"
+        minruby_load()
+      when "require"
+        require(evaluate(exp[2], env))
       else
         raise("unknown builtin function")
       end
     else
-
 
 #
 ## Problem 5: Function definition
@@ -158,9 +173,19 @@ def evaluate(exp, env)
       # `def foo(a, b, c)`.
       # raise(NotImplementedError) # Problem 5
       func_env = {}
-      func[0].each_with_index do |v, i|
-        func_env[v] = evaluate(exp[2+i], env)
+
+      ### each_with_index version (not supported by minruby)
+      # func[0].each_with_index do |v, i|
+      #   func_env[v] = evaluate(exp[2+i], env)
+      # end
+
+      i = 0
+      while func[0][i]
+        elem = func[0][i]
+        func_env[elem] = evaluate(exp[2+i], env)
+        i = i + 1
       end
+
       evaluate(func[1], func_env)
     end
 
@@ -174,42 +199,77 @@ def evaluate(exp, env)
     #
     # Advice: $function_definitions[???] = ???
     # raise(NotImplementedError) # Problem 5
-    $function_definitions[exp[1]] = exp[2..-1]
+
+    ### Array[2..-1] not supported
+    # $function_definitions[exp[1]] = exp[2..-1]
+    i = 2
+    # $function_definitions[exp[1]] = Array.new(exp.length-2, nil)
+    $function_definitions[exp[1]] = []
+    while exp[i]
+      $function_definitions[exp[1]].push(exp[i])
+      i = i + 1
+    end
 
 #
 ## Problem 6: Arrays and Hashes
 #
 
   # You don't need advices anymore, do you?
-  # pp(exp)
-  # pp(env)
   when "ary_new"
     # raise(NotImplementedError) # Problem 6
-    exp[1..-1].map do |v|
-      evaluate(v, env)
+    ### map version (not supported by minruby)
+    # exp[1..-1].map do |v|
+    #   evaluate(v, env)
+    # end
+
+    i = 1
+    new_arr = []
+    while exp[i]
+      new_arr.push(evaluate(exp[i], env))
+      i = i + 1
     end
+    new_arr
 
   when "ary_ref"
     # raise(NotImplementedError) # Problem 6
-    evaluate(exp[1], env)[evaluate(exp[2], env)]
 
+    if exp[1] != nil
+      if evaluate(exp[1], env) != nil
+        evaluate(exp[1], env)[evaluate(exp[2], env)]
+      end
+    end
   when "ary_assign"
     # raise(NotImplementedError) # Problem 6
     env[exp[1][1]][evaluate(exp[2],env)] = evaluate(exp[3], env)
 
   when "hash_new"
     # raise(NotImplementedError) # Problem 6
-    exp[1..-1].map do |v|
-      evaluate(v, env)
-    end.each_slice(2).to_h
+    ### minruby not supported version
+    # exp[1..-1].map do |v|
+    #   evaluate(v, env)
+    # end.each_slice(2).to_h
 
+    i = 1
+    new_hash = {}
+    while exp[i]
+      new_hash[evaluate(exp[i], env)] = evaluate(exp[i+1], env)
+      i = i + 2
+    end
+    new_hash
+
+  when "method_call"
+    case exp[2]
+    when "nil?"
+      evaluate(exp[1], env) == nil
+    else
+      raise("unknown builtin method")
+    end
   else
     p("error")
-    pp(exp)
     raise("unknown node")
   end
 end
-
+end
 
 $function_definitions = {}
 env = {}
